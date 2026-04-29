@@ -1,3 +1,4 @@
+import 'package:cepu_app/screens/add_post_screen.dart';
 import 'package:cepu_app/screens/sign_in_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -58,6 +59,14 @@ class _HomeScreenState extends State<HomeScreen> {
           SizedBox(height: 16.0),
           const Center(child: Text("You Have Been Signed In!")),
         ],
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          Navigator.of(context).push(
+            MaterialPageRoute(builder: (context) => const AddPostScreen()),
+          );
+        },
+        child: const Icon(Icons.add),
       ),
     );
   }
