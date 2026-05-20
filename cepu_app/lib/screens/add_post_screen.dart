@@ -205,6 +205,8 @@ class _AddPostScreenState extends State<AddPostScreen> {
         ),
       );
       if (!mounted) return;
+      await sendNotificationToTopic(_descriptionController.text, fullName!);
+
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text("Posting berhasil disimpan")));
@@ -230,7 +232,8 @@ class _AddPostScreenState extends State<AddPostScreen> {
     setState(() => _isGenerating = true);
     try {
       const apiKey = 'YOUR-API-KEY';
-      const url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=$apiKey';
+      const url =
+          'https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=$apiKey';
       final body = jsonEncode({
         "contents": [
           {
@@ -292,6 +295,36 @@ class _AddPostScreenState extends State<AddPostScreen> {
     }
   }
 
+  Future<void> sendNotificationToTopic(String body, String senderName) async {
+    final url = Uri.parse('https://cepu-cloud-if.vercel.app/send-to-topic');
+    final response = await http.post(
+      url,
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({
+        "topic": "berita",
+        "title": "🔔 Laporan Baru",
+        "body": body,
+        "senderName": senderName,
+        "senderPhotoUrl":
+            "https://static.vecteezy.com/system/resources/thumbnails/041/642/167/small_2x/ai-generated-portrait-of-handsome-smiling-young-man-with-folded-arms-isolated-free-png.png",
+      }),
+    );
+
+    if (response.statusCode == 200) {
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text("Notofikasi berhasil dikirim")));
+      }
+    } else {
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text("Notifikasi gagal dikirim")));
+      }
+    }
+  }
+
   @override
   void dispose() {
     _descriptionController.dispose();
@@ -317,14 +350,16 @@ class _AddPostScreenState extends State<AddPostScreen> {
                   child: Text(_isGenerating ? 'Generating...' : 'Select Image'),
                 ),
                 const SizedBox(width: 16),
-                if(!_isGenerating && _base64Image != null)
+                if (!_isGenerating && _base64Image != null)
                   OutlinedButton(
-                    onPressed: _isGenerating ? null : _generateDescriptionWithAI,
+                    onPressed: _isGenerating
+                        ? null
+                        : _generateDescriptionWithAI,
                     child: Text('Generate Description'),
-                  )
-              ]
-             ),
-            
+                  ),
+              ],
+            ),
+
             const SizedBox(height: 16),
             OutlinedButton(
               onPressed: _isSubmitting ? null : _showCategorySelect,
